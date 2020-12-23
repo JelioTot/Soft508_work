@@ -2,9 +2,12 @@
 
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+#include<SPI.h> 
 
 #define trigPin 19
 #define echoPin 18
+#define LEDpin 13
+
 
 LiquidCrystal_I2C lcd(0x27,16,2);  //set LCD addressto 0x27 for a 16 chars and 2 ine display
 int n=1;
@@ -13,11 +16,14 @@ int tooClose = 0;
 int Speed = 255;
 int exploreMode = 0;
 
+volatile boolean received;
+volatile byte Slavereceived,Slavesend;
+
 void setup() {
   // put your setup code here, to run once:
 lcd.init();
 lcd.backlight();
-Serial.begin(9600);
+Serial.begin(115200);
 
 pinMode(trigPin, OUTPUT);
 pinMode(echoPin, INPUT);
@@ -33,7 +39,22 @@ pinMode(echoPin, INPUT);
   digitalWrite(9, HIGH); 
   digitalWrite(8, HIGH);
 
+            
+  pinMode(LEDpin,OUTPUT); 
 
+  pinMode(MISO,OUTPUT);
+  SPCR |= _BV(SPE); //turn on SPI in slave move using register
+  received = false;
+  SPI.attachInterrupt(); //turn On SPI communication
+  
+
+
+}
+
+ISR (SPI_STC_vect)
+{
+  Slavereceived = SPDR;                  
+  received = true;                       
 }
 
 void loop() {
@@ -80,6 +101,22 @@ void loop() {
   delay(delaylegnth);
   }
   }
+  Serial.println(Slavereceived);
+if(received){
+   if (Slavereceived==1)
+   {
+   digitalWrite(LEDpin,HIGH); //Sets pin 13 as HIGH LED ON
+   Serial.println("Slave LED ON");
+   Serial.println(Slavereceived);
+     }
+  else
+      {
+  digitalWrite(LEDpin,LOW);     //Sets pin 13 as LOW LED OFF
+  Serial.println("Slave LED OFF");
+  Serial.println(Slavereceived);
+      }
+}
+received = false;
   
 n=n+1;
 }
