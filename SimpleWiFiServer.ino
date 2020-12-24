@@ -9,6 +9,7 @@
  If the IP address of your shield is yourAddress:
  http://yourAddress/H turns the LED on
  http://yourAddress/L turns it off
+ http://192.168.1.227/S
 
  This example is written for a network using WPA encryption. For
  WEP or WPA, change the Wifi.begin() call accordingly.
@@ -120,6 +121,9 @@ void loop(){
             // the content of the HTTP response follows the header:
             client.print("Click <a href=\"/H\">here</a> to turn the LED on pin 5 on.<br>");
             client.print("Click <a href=\"/L\">here</a> to turn the LED on pin 5 off.<br>");
+            client.print("Click <a href=\"/F\">here</a> to Move forwards.<br>");
+            client.print("Click <a href=\"/R\">here</a> to Rotate.<br>");
+            client.print("Click <a href=\"/S\">here</a> to Stop.<br>");
 
             // The HTTP response ends with another blank line:
             client.println();
@@ -141,6 +145,18 @@ void loop(){
         if (currentLine.endsWith("GET /L")) {
           digitalWrite(2, LOW);                // GET /L turns the LED off
          data = 0b00000000;
+         vspiCommand();
+        }
+        if (currentLine.endsWith("GET /F")) {
+         data = 2;  
+         vspiCommand();
+        }
+        if (currentLine.endsWith("GET /R")) {
+         data = 3;  
+         vspiCommand();
+        }
+        if (currentLine.endsWith("GET /S")) {
+         data = 4;  
          vspiCommand();
         }
       }

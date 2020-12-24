@@ -13,7 +13,7 @@ LiquidCrystal_I2C lcd(0x27,16,2);  //set LCD addressto 0x27 for a 16 chars and 2
 int n=1;
 int delaylegnth = 30;
 int tooClose = 0;
-int Speed = 255;
+int Speed = 125;
 int exploreMode = 0;
 
 volatile boolean received;
@@ -71,35 +71,16 @@ void loop() {
   Ultrasconic();
   if (exploreMode == 1){
   if (tooClose == 1){
-  digitalWrite(9, LOW);  //ENABLE CH A
-  digitalWrite(8, LOW);  //ENABLE CH B
-
-  digitalWrite(12, HIGH);   //Sets direction of CH A
-  analogWrite(3, 0);   //Moves CH A
-  digitalWrite(13, LOW);   //Sets direction of CH B
-  analogWrite(11, 0);   //Moves CH B
-  
-  delay(delaylegnth);
-
-  digitalWrite(12, HIGH);   //Sets direction of CH A
-  analogWrite(3, 125);   //Moves CH A
-  digitalWrite(13, HIGH);   //Sets direction of CH B
-  analogWrite(11, 125);   //Moves CH B
-  
-  delay(delaylegnth);
+    
+  Stop();
+  Spin();
   
   }
   else if (tooClose ==0){
-  digitalWrite(9, LOW);  //ENABLE CH A
-  digitalWrite(8, LOW);  //ENABLE CH B
-
-  digitalWrite(12, HIGH);   //Sets direction of CH A
-  analogWrite(3, Speed);   //Moves CH A
-  digitalWrite(13, LOW);   //Sets direction of CH B
-  analogWrite(11, Speed);   //Moves CH B
-  
-  delay(delaylegnth);
+    
+  Forwards();
   }
+  
   }
   Serial.println(Slavereceived);
 if(received){
@@ -109,12 +90,20 @@ if(received){
    Serial.println("Slave LED ON");
    Serial.println(Slavereceived);
      }
-  else
+  else if (Slavereceived==0)
       {
   digitalWrite(LEDpin,LOW);     //Sets pin 13 as LOW LED OFF
   Serial.println("Slave LED OFF");
   Serial.println(Slavereceived);
       }
+  else if (Slavereceived==2)
+  Forwards();
+
+  else if (Slavereceived==3)
+  Spin();
+
+  else
+  Stop();
 }
 received = false;
   
@@ -161,6 +150,41 @@ void Ultrasconic(){
   delay(500);
   
 }
+
+void Forwards(){
+  digitalWrite(9, LOW);  //ENABLE CH A
+  digitalWrite(8, LOW);  //ENABLE CH B
+
+  digitalWrite(12, HIGH);   //Sets direction of CH A
+  analogWrite(3, Speed);   //Moves CH A
+  digitalWrite(13, LOW);   //Sets direction of CH B
+  analogWrite(11, Speed);   //Moves CH B
+  
+  delay(delaylegnth);
+}
+
+void Spin(){
+  digitalWrite(12, HIGH);   //Sets direction of CH A
+  analogWrite(3, 125);   //Moves CH A
+  digitalWrite(13, HIGH);   //Sets direction of CH B
+  analogWrite(11, 125);   //Moves CH B
+  
+  delay(delaylegnth);
+  
+}
+
+void Stop(){
+  digitalWrite(9, LOW);  //ENABLE CH A
+  digitalWrite(8, LOW);  //ENABLE CH B
+
+  digitalWrite(12, HIGH);   //Sets direction of CH A
+  analogWrite(3, 0);   //Moves CH A
+  digitalWrite(13, LOW);   //Sets direction of CH B
+  analogWrite(11, 0);   //Moves CH B
+  
+  delay(delaylegnth);
+}
+
 
 String READ(){
   String text;
