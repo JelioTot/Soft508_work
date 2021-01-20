@@ -18,9 +18,58 @@
 
 AsyncWebServer server(80);   // http port
 
-const char buttons[] {"<!DOCTYPE html>\n<html>\n<head>\n<style>\n.button {\n  border: none;\n  color: white;\n  padding: 16px 32px;\n  text-align: center;\n  text-decoration: none;\n  display: inline-block;\n  font-size: 16px;\n  margin: 4px 2px;\n  transition-duration: 0.4s;\n  cursor: pointer;\n}\n\n.button1 {\n  background-color: white; \n  color: black; \n  border: 2px solid #4CAF50;\n}\n\n.button1:hover {\n  background-color: #4CAF50;\n  color: white;\n}\n\n.button2 {\n  background-color: white; \n  color: black; \n  border: 2px solid #008CBA;\n}\n\n.button2:hover {\n  background-color: #008CBA;\n  color: white;\n}\n.button3 {\n  background-color: white; \n  color: black; \n  border: 2px solid #008CBA;\n}\n\n.button3:hover {\n  background-color: #008CBA;\n  color: white;\n}\n.button4 {\n  background-color: white; \n  color: black; \n  border: 2px solid #008CBA;\n}\n\n.button4:hover {\n  background-color: #008CBA;\n  color: white;\n}\n\n</style>\n</head>\n<body>\n\n<h1>The button element - Styled with CSS</h1>\n\n<p>Use the :hover selector to change the style of the button when you move the mouse over it.</p>\n<p><strong>Tip:</strong> Use the transition-duration property to determine the speed of the \"hover\" effect:</p>\n\n<button class=\"button button1\">Green</button>\n<button class=\"button button2\">Blue</button>\n<button class=\"button button3\">Blue</button>\n<button class=\"button button4\">Blue</button>\n\n</body>\n</html>\n"};
 const char* ssid     = "PLUSNET-PTJKQ3";
 const char* password = "dfb6aaf46e";
+byte data;
+
+const char WEBPAGE[] PROGMEM = R"=====(
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.button {
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.buttonForward {background-color: #4CAF50;} /* Green */
+.buttonLeft {background-color: #4CAF50;} /* Green */
+.buttonRight {background-color: #4CAF50;} /* Green */
+.buttonBackward {background-color: #4CAF50;} /* Green */
+.buttonStop {background-color: #008CBA;} /* Blue */
+</style>
+</head>
+<body>
+
+<h1>Buggy Controller</h1>
+
+<form action="/forward">
+  <button class="button buttonForward">Forward!</button>
+</form>
+<form action="/left">
+  <button class="button buttonLeft">Left!</button>
+</form>
+<form action="/right">
+  <button class="button buttonRight">Right!</button>
+</form>
+<form action="/backward">
+  <button class="button buttonBackward">Backward!</button>
+</form>
+<form action="/stop">
+  <button class="button buttonStop">Stop!</button>
+</form>
+
+<meta http-equiv="refresh" content="2;/" />;
+</body>
+</html>
+)=====";
 
 const char* PARAM_MESSAGE = "message";
 
@@ -75,18 +124,39 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(200, "text/html", buttons);
+      request->send(200, "text/html", WEBPAGE);
+        //request->send(200, "text/html", button2);
     });
 
     // Send a GET request to <IP>/get?message=<message>
-    server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        String message;
-        if (request->hasParam(PARAM_MESSAGE)) {
-            message = request->getParam(PARAM_MESSAGE)->value();
-        } else {
-            message = "No message sent";
-        }
-        request->send(200, "text/plain", "Hello, GET: " + message);
+    server.on("/forward", HTTP_GET, [] (AsyncWebServerRequest *request) {
+      request->send(200, "text/html", WEBPAGE);
+      data = 2;
+      vspiCommand();
+    });
+
+    server.on("/left", HTTP_GET, [] (AsyncWebServerRequest *request) {
+      request->send(200, "text/html", WEBPAGE);
+      data = 3;
+      vspiCommand();
+    });
+
+    server.on("/right", HTTP_GET, [] (AsyncWebServerRequest *request) {
+      request->send(200, "text/html", WEBPAGE);
+      data = 3;
+      vspiCommand();
+    });
+    
+    server.on("/backward", HTTP_GET, [] (AsyncWebServerRequest *request) {
+      request->send(200, "text/html", WEBPAGE);
+      data = 3;
+      vspiCommand();
+    });
+
+    server.on("/stop", HTTP_GET, [] (AsyncWebServerRequest *request) {
+      request->send(200, "text/html", WEBPAGE);
+      data = 4;
+      vspiCommand();
     });
 
     // Send a POST request to <IP>/post with a form field message set to <message>
@@ -109,7 +179,6 @@ void loop() {
 }
 
 void vspiCommand() {
-  byte data = 0b00001100;
   //use it as you would the regular arduino SPI API
   vspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
   digitalWrite(5, LOW); //pull SS slow to prep other end for transfer

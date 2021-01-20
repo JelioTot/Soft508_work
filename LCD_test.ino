@@ -100,7 +100,7 @@ if(received){
   Forwards();
 
   else if (Slavereceived==3)
-  Spin();
+  BackWards();
 
   else
   Stop();
@@ -158,6 +158,18 @@ void Forwards(){
   digitalWrite(12, HIGH);   //Sets direction of CH A
   analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, LOW);   //Sets direction of CH B
+  analogWrite(11, Speed);   //Moves CH B
+  
+  delay(delaylegnth);
+}
+
+void BackWards(){
+  digitalWrite(9, LOW);  //ENABLE CH A
+  digitalWrite(8, LOW);  //ENABLE CH B
+
+  digitalWrite(12, LOW);   //Sets direction of CH A
+  analogWrite(3, Speed);   //Moves CH A
+  digitalWrite(13, HIGH);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
   
   delay(delaylegnth);
