@@ -54,13 +54,12 @@ pinMode(echoPin, INPUT);
 ISR (SPI_STC_vect)
 {
   Slavereceived = SPDR;                  
-  received = true;                       
+  received = true;                     
 }
 
-void loop() {
+void loop() {                          
   if (n>=16)
   n=1;
-  // put your main code here, to run repeatedly:
   lcd.setCursor(5, 0);
   lcd.print("Hello");
   lcd.setCursor(n, 1);
@@ -83,7 +82,7 @@ void loop() {
   
   }
   Serial.println(Slavereceived);
-if(received){
+  if(received){
    if (Slavereceived==1)
    {
    digitalWrite(LEDpin,HIGH); //Sets pin 13 as HIGH LED ON
@@ -108,6 +107,7 @@ if(received){
 received = false;
   
 n=n+1;
+
 }
 
 
@@ -130,7 +130,9 @@ void Ultrasconic(){
   
   duration = pulseIn(echoPin, HIGH);
   distance = (duration/2) / 29.1;
-
+  Slavesend = distance;
+  SPDR = Slavesend;
+  
   // Print the distance to the terminal
   if (distance >= 200 || distance <= 0){
     Serial.println("Out of range");
@@ -143,11 +145,8 @@ void Ultrasconic(){
       if (distance < 10) {
         tooClose = 1;
         Serial.println("STOP BUGGY");
-        
       }
   }
-  
-  delay(500);
   
 }
 

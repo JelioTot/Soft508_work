@@ -15,6 +15,8 @@
 #endif
 #include <ESPAsyncWebServer.h>
 #include <SPI.h>
+#include <PS4Controller.h>
+
 
 AsyncWebServer server(80);   // http port
 
@@ -66,12 +68,13 @@ const char WEBPAGE[] PROGMEM = R"=====(
   <button class="button buttonStop">Stop!</button>
 </form>
 
-<meta http-equiv="refresh" content="2;/" />;
+<p>Distance: %PLACEHOLDER_DISTANCE%m <p>
+
+<meta http-equiv="refresh" content="2;/" />
 </body>
 </html>
 )=====";
 
-const char* PARAM_MESSAGE = "message";
 
 void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
@@ -83,7 +86,11 @@ static const int spiClk = 1000000; // 1 MHz
 SPIClass * vspi = NULL;
 SPIClass * hspi = NULL;
 
+int distance = 0;
+
 void setup() {
+
+  
   //initialise two instances of the SPIClass attached to VSPI and HSPI respectively
   vspi = new SPIClass(VSPI);
   hspi = new SPIClass(HSPI);
@@ -107,12 +114,16 @@ void setup() {
   pinMode(5, OUTPUT); //VSPI SS
   pinMode(15, OUTPUT); //HSPI SS
 
+  SPI.begin();                            //Begins the SPI commnuication
+  SPI.setClockDivider(SPI_CLOCK_DIV16); 
+   digitalWrite(SS,HIGH);                  // Setting SlaveSelect as HIGH (So master doesnt connnect with slave)
+
   Serial.begin(115200);
+  
     pinMode(2, OUTPUT);      // set the LED pin mode
 
     delay(10);
 
-    Serial.begin(115200);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     if (WiFi.waitForConnectResult() != WL_CONNECTED) {
@@ -124,59 +135,56 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/html", WEBPAGE);
-        //request->send(200, "text/html", button2);
+      request->send_P(200, "text/html", WEBPAGE, processor);
     });
 
     // Send a GET request to <IP>/get?message=<message>
     server.on("/forward", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send(200, "text/html", WEBPAGE);
+      request->send_P(200, "text/html", WEBPAGE, processor);
       data = 2;
       vspiCommand();
     });
 
     server.on("/left", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send(200, "text/html", WEBPAGE);
+      request->send_P(200, "text/html", WEBPAGE, processor);
       data = 3;
       vspiCommand();
     });
 
     server.on("/right", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send(200, "text/html", WEBPAGE);
+      request->send_P(200, "text/html", WEBPAGE, processor);
       data = 3;
       vspiCommand();
     });
     
     server.on("/backward", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send(200, "text/html", WEBPAGE);
+      request->send_P(200, "text/html", WEBPAGE, processor);
       data = 3;
       vspiCommand();
     });
 
     server.on("/stop", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send(200, "text/html", WEBPAGE);
+      request->send_P(200, "text/html", WEBPAGE, processor);
       data = 4;
       vspiCommand();
     });
 
-    // Send a POST request to <IP>/post with a form field message set to <message>
-    server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request){
-        String message;
-        if (request->hasParam(PARAM_MESSAGE, true)) {
-            message = request->getParam(PARAM_MESSAGE, true)->value();
-        } else {
-            message = "No message sent";
-        }
-        request->send(200, "text/plain", "Hello, POST: " + message);
-    });
-
     server.onNotFound(notFound);
-
     server.begin();
+    vspiCommand();
 }
 
 void loop() {
+  byte Mastersend,Mastereceive;
+   digitalWrite(5, LOW);
+   Mastereceive=SPI.transfer(Mastersend);
+   distance= Mastereceive;
+   digitalWrite(5, HIGH);
+   Serial.println(Mastereceive);
+   
+   delay(1000);
 }
+
 
 void vspiCommand() {
   //use it as you would the regular arduino SPI API
@@ -185,6 +193,7 @@ void vspiCommand() {
   vspi->transfer(data);  
   digitalWrite(5, HIGH); //pull ss high to signify end of data transfer
   vspi->endTransaction();
+  
   
 }
 
@@ -196,4 +205,18 @@ void hspiCommand() {
   hspi->transfer(stuff);
   digitalWrite(15, HIGH);
   hspi->endTransaction();
+}
+
+String processor(const String& dist)
+{
+
+  if (dist == "PLACEHOLDER_DISTANCE") {
+    return String(distance); 
+  }
+
+  else if (dist == "PLACEHOLDER_ACTION") {
+    return String(random(0, 50)); // This needs actual action
+  }
+
+  return String();
 }
