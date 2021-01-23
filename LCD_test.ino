@@ -85,11 +85,9 @@ void loop() {
   if(received){
    if (Slavereceived==1)
    {
-   digitalWrite(LEDpin,HIGH); //Sets pin 13 as HIGH LED ON
-   Serial.println("Slave LED ON");
-   Serial.println(Slavereceived);
+   Left();
      }
-  else if (Slavereceived==0)
+  else if (Slavereceived==5)
       {
   digitalWrite(LEDpin,LOW);     //Sets pin 13 as LOW LED OFF
   Serial.println("Slave LED OFF");
@@ -99,7 +97,10 @@ void loop() {
   Forwards();
 
   else if (Slavereceived==3)
-  BackWards();
+  Right();
+
+  else if (Slavereceived==4)
+  Backwards();
 
   else
   Stop();
@@ -159,10 +160,10 @@ void Forwards(){
   digitalWrite(13, LOW);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
   
-  delay(delaylegnth);
+  delay(delaylegnth); 
 }
 
-void BackWards(){
+void Backwards(){
   digitalWrite(9, LOW);  //ENABLE CH A
   digitalWrite(8, LOW);  //ENABLE CH B
 
@@ -170,6 +171,26 @@ void BackWards(){
   analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, HIGH);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
+  
+  delay(delaylegnth);
+}
+
+void Left(){
+  
+  digitalWrite(12, HIGH);   //Sets direction of CH A
+  analogWrite(3, 125);   //Moves CH A
+  digitalWrite(13, HIGH);   //Sets direction of CH B
+  analogWrite(11, 0);   //Moves CH B
+  
+  delay(delaylegnth);
+}
+
+void Right(){
+  
+  digitalWrite(12, LOW);   //Sets direction of CH A
+  analogWrite(3, 0);   //Moves CH A
+  digitalWrite(13, LOW);   //Sets direction of CH B
+  analogWrite(11, 125);   //Moves CH B
   
   delay(delaylegnth);
 }
