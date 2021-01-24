@@ -43,26 +43,62 @@ const char WEBPAGE[] PROGMEM = R"=====(
   cursor: pointer;
 }
 
-.buttonForward {background-color: #4CAF50;} /* Green */
-.buttonLeft {background-color: #4CAF50;} /* Green */
-.buttonRight {background-color: #4CAF50;} /* Green */
-.buttonBackward {background-color: #4CAF50;} /* Green */
-.buttonStop {background-color: #008CBA;} /* Blue */
-.buttonExplore {background-color: #f44336;}  /* Red */
-.buttonControl {background-color: #555555;}  /* Black */ 
+
+.buttonForward {background-color: #4CAF50;
+position: absolute;
+right: 875px;
+width: 150px;
+height: 50px;} /* Green */
+.buttonLeft {background-color: #4CAF50;
+position: absolute;
+right: 960px;
+width: 100px;
+height: 50px;
+top: 170px;} /* Green */
+.buttonRight {background-color: #4CAF50;
+position: absolute;
+right: 840px;
+width: 100px;
+height: 50px;
+top: 170px;} /* Green */
+.buttonBackward {background-color: #4CAF50;
+position: absolute;
+right: 875px;
+width: 150px;
+height: 50px;
+top: 230px} /* Green */
+.buttonStop {background-color: #008CBA;
+position: absolute;
+right: 875px;
+width: 150px;
+height: 50px;
+top: 290px} /* Blue */
+.buttonExplore {background-color: #f44336;
+position: absolute;
+right: 865px;
+width: 170px;
+height: 50px;
+top: 350px}  /* Red */
+.buttonControl {background-color: #555555;
+position: absolute;
+right: 865px;
+width: 170px;
+height: 50px;
+top: 410px}  /* Black */ 
 
 </style>
 </head>
 <body>
-
+<center>
 <h1>Buggy Controller</h1>
+<p>Distance: %PLACEHOLDER_DISTANCE%cm <p>
 
 <form action="/forward">
   <button class="button buttonForward">Forward!</button>
 </form>
 <form action="/left">
-  <button class="button buttonLeft">Left!</button>
-</form>
+  <button class="button buttonLeft">Left!</button> 
+ </form>
 <form action="/right">
   <button class="button buttonRight">Right!</button>
 </form>
@@ -72,14 +108,12 @@ const char WEBPAGE[] PROGMEM = R"=====(
 <form action="/stop">
   <button class="button buttonStop">Stop!</button>
 </form>
-<form action="/explore">
+<form action="/explorePage">
   <button class="button buttonExplore">Explore Mode!</button>
 </form>
 <form action="/controller">
   <button class="button buttonControl">Use Controller</button>
 </form>
-
-<p>Distance: %PLACEHOLDER_DISTANCE%cm <p>
 
 <meta http-equiv="refresh" content="2;/" />
 </body>
@@ -89,12 +123,49 @@ const char WEBPAGE[] PROGMEM = R"=====(
 const char ControllerPAGE[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
-<header>
+<body>
+<centre>
 <h1> You may now use the contoller to control the buggy </h1>
-<h2> Press Number 1 on your contoller to exit controller mode </h2>
-
+<h2> Press Hash on your contoller to exit controller mode </h2>
+<p>NumPad Keys 1 to 6 control the speed of the buggy</p>
+<p>1 - 20<span>&#37;</span></p>
+<p>2 - 40<span>&#37;</span></p>
+<p>3 - 60<span>&#37;</span></p>
+<p>4 - 75<span>&#37;</span></p>
+<p>5 - 90<span>&#37;</span></p>
+<p>6 - 100<span>&#37;</span></p>
 <p>Distance: %PLACEHOLDER_DISTANCE%cm <p>
 <meta http-equiv="refresh" content="2;/controller" />
+</body>
+</html>
+
+)=====";
+
+const char ExplorePAGE[] PROGMEM = R"=====(
+<!DOCTYPE html>
+<html>
+<style>
+.button {
+  border: none;
+  color: black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+</style>
+<header>
+<h1> Buggy is in Explore more </h1>
+<h2> click here to exit explore mode </h2>
+<form action="/explore">
+  <button class="button">here</button>
+</form>
+
+<p>Distance: %PLACEHOLDER_DISTANCE%cm <p>
+<meta http-equiv="refresh" content="1;/explorePage" />
 </header>
 </html>
 
@@ -111,6 +182,9 @@ SPIClass * vspi = NULL;
 SPIClass * hspi = NULL;
 
 int distance = 0;
+bool controller = false;
+
+const char* pSpeed = "pSpeed";
 
 const uint16_t kRecvPin = 4;
 IRrecv irrecv(kRecvPin);
@@ -148,45 +222,8 @@ void IRAM_ATTR isr(){
         if (results.value == 0XFFFFFFFF) results.value = key_value;
         
   switch (results.value){
-    case 0xFF18E7:   ///up arrow
+    case up:   ///up arrow
     data = 2;
-    vspiCommand();
-    Serial.println("done");
-  }
-  if ((results.value)== one);//do nothing;
-  if ((results.value)== two);//do nothing;
-  if ((results.value)== three);//do nothing;
-  if ((results.value)== four);//do nothing;
-  if ((results.value)== five);//do nothing;
-  if ((results.value)== six);//do nothing;
-  if ((results.value)== seven);//do nothing;
-  if ((results.value)== eight);//do nothing;
-  if ((results.value)== nine);//do nothing;
-  if ((results.value)== zero);//do nothing;
-  if ((results.value)== hash);//do nothing;
-  if ((results.value)== star);//do nothing;
-  if ((results.value)== 0xFF38C7){
-    data = 0;
-    vspiCommand();
-  }
-  if ((results.value)== 0xFF18E7){
-    data = 2;
-    vspiCommand();
-  }
-  if ((results.value)== down){
-    data = 4;
-    vspiCommand();
-  }
-  if ((results.value)== left){
-    data = 2;
-    vspiCommand();
-  }
-  if ((results.value)== right){
-    data = 3;
-    vspiCommand();
-  }
-  if ((results.value)== down){
-    data = 3;
     vspiCommand();
   }
   irrecv.resume();
@@ -259,47 +296,63 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send_P(200, "text/html", WEBPAGE, processor);
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
     });
 
     // Send a GET request to <IP>/get?message=<message>
     server.on("/forward", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send_P(200, "text/html", WEBPAGE, processor);
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
       data = 2;
       vspiCommand();
     });
 
     server.on("/left", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send_P(200, "text/html", WEBPAGE, processor);
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
       data = 1;
       vspiCommand();
     });
 
     server.on("/right", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send_P(200, "text/html", WEBPAGE, processor);
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
       data = 3;
       vspiCommand();
     });
     
     server.on("/backward", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send_P(200, "text/html", WEBPAGE, processor);
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
       data = 4;
       vspiCommand();
     });
 
     server.on("/stop", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send_P(200, "text/html", WEBPAGE, processor);
-      data = 0;
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
+      data = 10;
       vspiCommand();
     });
     server.on("/explore", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      request->send_P(200, "text/html", WEBPAGE, processor);
+      request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
+      data = 8;
+      vspiCommand();
+    });
+
+    server.on("/explorePage", HTTP_GET, [] (AsyncWebServerRequest *request) {
+      request->send_P(200, "text/html", ExplorePAGE, Ultrasonic);
+      data = 6;
+      vspiCommand();
     });
     
      server.on("/controller", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      if (data == 5) request->send_P(200, "text/html", WEBPAGE, processor);
+      if (data == 5){ 
+        request->send_P(200, "text/html", WEBPAGE, Ultrasonic);
+        data = 0;
+        vspiCommand();
+        controller = false;
+      }
       else {
-      request->send_P(200, "text/html", ControllerPAGE, processor);
+      request->send_P(200, "text/html", ControllerPAGE, Ultrasonic);
+      data = 7;
+      controller = true;
+      vspiCommand();
       }
      });
 
@@ -324,7 +377,7 @@ void loop() {
   }
 
    //Serial.println(Mastereceive);
-   
+   if (controller == true){
    if (irrecv.decode(&results)) {
     // print() & println() can't handle printing long longs. (uint64_t)
     serialPrintUint64(results.value, HEX);
@@ -335,29 +388,54 @@ void loop() {
     data = 2;
     vspiCommand();
     break;
-    case ok:   ///up arrow
-    data = 0;
+    case ok:   ///ok button
+    data = 10;
     vspiCommand();
     break;
-    case hash:
+    case hash:  //hash button
     data = 5;
     vspiCommand();
     break;
-    case left:   ///up arrow
+    case left:   
     data = 1;
     vspiCommand();
     break;
-    case right:   ///up arrow
+    case right:   
     data = 3;
     vspiCommand();
     break;
-    case down:   ///up arrow
+    case down:   
     data = 4;
+    vspiCommand();
+    break;
+    case one:   
+    data = 11;
+    vspiCommand();
+    break;
+    case two:   
+    data = 12;
+    vspiCommand();
+    break;
+    case three:   
+    data = 13;
+    vspiCommand();
+    break;
+    case four:   
+    data = 14;
+    vspiCommand();
+    break;
+    case five:   
+    data = 15;
+    vspiCommand();
+    break;
+    case six:   
+    data = 16;
     vspiCommand();
     break;
     
   }
   }
+}
   
   //Serial.println(data);
 }
@@ -386,16 +464,11 @@ void hspiCommand() {
 
 
 
-String processor(const String& dist)
+String Ultrasonic(const String& dist)
 {
 
   if (dist == "PLACEHOLDER_DISTANCE") {
     return String(distance); 
   }
-
-  else if (dist == "PLACEHOLDER_ACTION") {
-    return String(random(0, 50)); // This needs actual action
-  }
-
   return String();
 }

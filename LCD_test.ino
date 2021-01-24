@@ -15,6 +15,8 @@ int delaylegnth = 30;
 int tooClose = 0;
 int Speed = 125;
 int exploreMode = 0;
+int lastAction;
+
 
 volatile boolean received;
 volatile byte Slavereceived,Slavesend;
@@ -60,55 +62,80 @@ ISR (SPI_STC_vect)
 void loop() {                          
   if (n>=16)
   n=1;
-  lcd.setCursor(5, 0);
-  lcd.print("Hello");
-  lcd.setCursor(n, 1);
-  lcd.print("SOFT");
-  delay(500);
-  lcd.clear();
+//  lcd.setCursor(5, 0);
+//  lcd.print("Hello");
+//  lcd.setCursor(n, 1);
+//  lcd.print("SOFT");
+//  delay(500);
+//  lcd.clear();
   
   Ultrasconic();
   if (exploreMode == 1){
-  if (tooClose == 1){
+    if (tooClose == 0){
+      Forwards(Speed);
+    }
+    else {Spin(Speed);}
     
-  Stop();
-  Spin();
-  
-  }
-  else if (tooClose ==0){
-    
-  Forwards();
+    if(received){
+      if (Slavereceived==8)
+        Stop();
+        exploreMode = 0;
+    }
   }
   
-  }
-  Serial.println(Slavereceived);
+  else{
+  
   if(received){
-   if (Slavereceived==1)
-   {
-   Left();
-     }
+    if (Slavereceived > 10){
+    if (Slavereceived==11)
+    Speed = 51;
+    if (Slavereceived==12)
+    Speed = 102;
+    if (Slavereceived==13)
+    Speed = 153;
+    if (Slavereceived==14)
+    Speed = 191;
+    if (Slavereceived==15)
+    Speed = 230;
+    if (Slavereceived==16)
+    Speed = 255;
+    if (lastAction == 1)
+    Left(Speed);
+    if (lastAction == 2)
+    Forwards(Speed);
+    if (lastAction == 3)
+     Right(Speed);
+    if (lastAction == 3)
+     Backwards(Speed);
+     
+    }
+    
+  if (Slavereceived == 10)
+    Stop();
+  else if (Slavereceived==1){
+    Left(Speed);
+    lastAction = 1;}
+  else if (Slavereceived==2){
+    Forwards(Speed);
+    lastAction = 2;}
+  else if (Slavereceived==3){
+    Right(Speed);
+    lastAction = 3;}
+  else if (Slavereceived==4){
+    Backwards(Speed);
+    lastAction = 4;}
   else if (Slavereceived==5)
-      {
-  digitalWrite(LEDpin,LOW);     //Sets pin 13 as LOW LED OFF
-  Serial.println("Slave LED OFF");
-  Serial.println(Slavereceived);
-      }
-  else if (Slavereceived==2)
-  Forwards();
-
-  else if (Slavereceived==3)
-  Right();
-
-  else if (Slavereceived==4)
-  Backwards();
-
-  else
-  Stop();
+    Stop();
+  else if (Slavereceived==6){
+    Speed = 125;
+    exploreMode = 1;}
 }
-received = false;
+  }
   
-n=n+1;
-
+    //Serial.println(Speed);
+  //Serial.println(Slavereceived);  //for testing
+  received = false;
+  n=n+1;
 }
 
 
@@ -117,7 +144,7 @@ void Ultrasconic(){
 
   // Looking at the HC SR04 datasheet
   // Formula: uS / 58 = centimeters
-  // "We suggest to use over 60ms measurement cycle, in order to prevent trigger signal to the echo signal" who knows...
+  // over 60ms measurement cycle
   
   // long is 64 bit size number
   long duration, distance;
@@ -142,16 +169,15 @@ void Ultrasconic(){
   else {
     Serial.print(distance);
     Serial.println(" cm");
-    tooClose = 0;
       if (distance < 10) {
         tooClose = 1;
         Serial.println("STOP BUGGY");
       }
   }
-  
+  delay(60);
 }
 
-void Forwards(){
+void Forwards(int Speed){
   digitalWrite(9, LOW);  //ENABLE CH A
   digitalWrite(8, LOW);  //ENABLE CH B
 
@@ -159,11 +185,11 @@ void Forwards(){
   analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, LOW);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
-  
+  Serial.println(Speed);
   delay(delaylegnth); 
 }
 
-void Backwards(){
+void Backwards(int Speed){
   digitalWrite(9, LOW);  //ENABLE CH A
   digitalWrite(8, LOW);  //ENABLE CH B
 
@@ -175,31 +201,32 @@ void Backwards(){
   delay(delaylegnth);
 }
 
-void Left(){
+void Left(int Speed){
   
   digitalWrite(12, HIGH);   //Sets direction of CH A
-  analogWrite(3, 125);   //Moves CH A
+  analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, HIGH);   //Sets direction of CH B
   analogWrite(11, 0);   //Moves CH B
   
   delay(delaylegnth);
 }
 
-void Right(){
+void Right(int Speed){
   
   digitalWrite(12, LOW);   //Sets direction of CH A
   analogWrite(3, 0);   //Moves CH A
   digitalWrite(13, LOW);   //Sets direction of CH B
-  analogWrite(11, 125);   //Moves CH B
-  
+  analogWrite(11, Speed);   //Moves CH B
+ 
   delay(delaylegnth);
 }
 
-void Spin(){
+void Spin(int Speed){
+  
   digitalWrite(12, HIGH);   //Sets direction of CH A
-  analogWrite(3, 125);   //Moves CH A
+  analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, HIGH);   //Sets direction of CH B
-  analogWrite(11, 125);   //Moves CH B
+  analogWrite(11, Speed);   //Moves CH B
   
   delay(delaylegnth);
   
