@@ -1,4 +1,4 @@
-#include <HID.h>
+//#include <HID.h>
 
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
@@ -88,15 +88,15 @@ void loop() {
   if(received){
     if (Slavereceived > 10){
     if (Slavereceived==11)
-    Speed = 51;
+    Speed = 200;
     if (Slavereceived==12)
-    Speed = 102;
+    Speed = 211;
     if (Slavereceived==13)
-    Speed = 153;
+    Speed = 222;
     if (Slavereceived==14)
-    Speed = 191;
+    Speed = 233;
     if (Slavereceived==15)
-    Speed = 230;
+    Speed = 244;
     if (Slavereceived==16)
     Speed = 255;
     if (lastAction == 1)
@@ -171,10 +171,10 @@ void Ultrasconic(){
     Serial.println(" cm");
       if (distance < 10) {
         tooClose = 1;
-        Serial.println("STOP BUGGY");
+        Serial.println("STOP BUGGY!");
       }
   }
-  delay(60);
+  //delay(60);
 }
 
 void Forwards(int Speed){
@@ -185,8 +185,8 @@ void Forwards(int Speed){
   analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, LOW);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
-  Serial.println(Speed);
-  delay(delaylegnth); 
+  
+  //delay(delaylegnth); 
 }
 
 void Backwards(int Speed){
@@ -198,7 +198,7 @@ void Backwards(int Speed){
   digitalWrite(13, HIGH);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
   
-  delay(delaylegnth);
+  //delay(delaylegnth);
 }
 
 void Left(int Speed){
@@ -206,19 +206,19 @@ void Left(int Speed){
   digitalWrite(12, HIGH);   //Sets direction of CH A
   analogWrite(3, Speed);   //Moves CH A
   digitalWrite(13, HIGH);   //Sets direction of CH B
-  analogWrite(11, 0);   //Moves CH B
+  analogWrite(11, Speed/2);   //Moves CH B
   
-  delay(delaylegnth);
+ // delay(delaylegnth);
 }
 
 void Right(int Speed){
   
   digitalWrite(12, LOW);   //Sets direction of CH A
-  analogWrite(3, 0);   //Moves CH A
+  analogWrite(3, Speed/2);   //Moves CH A
   digitalWrite(13, LOW);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
  
-  delay(delaylegnth);
+  //delay(delaylegnth);
 }
 
 void Spin(int Speed){
@@ -228,7 +228,7 @@ void Spin(int Speed){
   digitalWrite(13, HIGH);   //Sets direction of CH B
   analogWrite(11, Speed);   //Moves CH B
   
-  delay(delaylegnth);
+  //delay(delaylegnth);
   
 }
 
@@ -241,7 +241,7 @@ void Stop(){
   digitalWrite(13, LOW);   //Sets direction of CH B
   analogWrite(11, 0);   //Moves CH B
   
-  delay(delaylegnth);
+  //delay(delaylegnth);
 }
 
 

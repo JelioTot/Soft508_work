@@ -158,7 +158,7 @@ const char ExplorePAGE[] PROGMEM = R"=====(
 }
 </style>
 <header>
-<h1> Buggy is in Explore more </h1>
+<h1> Buggy is in Explore mode </h1>
 <h2> click here to exit explore mode </h2>
 <form action="/explore">
   <button class="button">here</button>
